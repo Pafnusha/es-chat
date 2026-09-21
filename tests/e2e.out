@@ -1,0 +1,43 @@
+psql:tests/bootstrap.sql:7: NOTICE:  schema "storage" does not exist, skipping
+psql:/tmp/qwenwork/chat/sql/02-rpc.sql:193: NOTICE:  policy "open read" for relation "public.chat_message" does not exist, skipping
+psql:/tmp/qwenwork/chat/sql/02-rpc.sql:195: NOTICE:  policy "rooms read" for relation "public.chat_room" does not exist, skipping
+psql:/tmp/qwenwork/chat/sql/02-rpc.sql:197: NOTICE:  policy "members read" for relation "public.chat_member" does not exist, skipping
+PASS  вход по нику и коду :: выберите комнату
+PASS  канал создан и виден в списке
+PASS  сообщение видно автору
+PASS  второй ник получил сообщение в реальном времени
+PASS  ответ дошёл обратно автору
+PASS  у сообщения виден остаток до самоуничтожения :: осталось ≈48 ч
+PASS  личное сообщение отправлено и видно автору
+PASS  у получателя собеседник появился в личке
+PASS  получатель прочитал личку
+PASS  третий ник не видит чужую личку в списках :: Личных пока нет — напиши первому.
+PASS  прямой RPC в чужую личку отбит :: 400 {"message": "ERROR:  wrong code\nCONTEXT:  PL/pgSQL function chat_dm_h
+PASS  чужой код к занятому нику не пускает :: Такой ник уже занят и закреплён другим кодом. Возьми другой ник.
+PASS  фото в открытом канале доехало и отрисовалось :: data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX
+PASS  фото в личке лежит в защищённой строке, а не по общедоступному пути :: data:image/jpeg;base64,/ / бд: data:image/jpeg;base64,/
+PASS  на iPhone-экране 390px нет горизонтального переполнения :: overflow=0px
+PASS  поле ввода прижато к низу и не залезает за экран :: {'b': 844, 'h': 63, 'win': 844}
+PASS  подсказка в поле ввода не обрезана :: {'clip': 0, 'fh': 46, 'natural': 240}
+PASS  фото в канале отрисовано, пустой рамки нет :: 240
+PASS  на телефоне список комнат во всю ширину :: {'drawerShare': 100, 'footBottom': 844, 'win': 844}
+PASS  футер ящика не вылезает за экран :: {'drawerShare': 100, 'footBottom': 844, 'win': 844}
+PASS  метёлка сработала :: [{"dm": 0, "before": "2026-09-19T19:37:32.490501+08:00", "messages": 1}]
+PASS  просроченное удалено целиком, вместе с фото :: старых=0, фото в бд=0
+PASS  личные сообщения и их вложения тоже стёрты :: старых лс=0
+PASS  RPC не принимает мусор вместо data-URL :: {"message": "ERROR:  bad img\nCONTEXT:  PL/pgSQL function chat_send(uu
+PASS  в открытую комнату нельзя написать чужим кодом :: {"message": "ERROR:  wrong code\nCONTEXT:  PL/pgSQL function chat_send
+PASS  вложение больше 400k отбивается на уровне БД :: psql:<stdin>:1: ERROR:  img too big
+CONTEXT:  PL/pgSQL function chat_send(uuid,t
+PASS  и в таблицу такое не попало :: 0
+
+все проверки пройдены
+    k     | count 
+----------+-------
+ rooms    |     1
+ messages |     2
+ dm       |     2
+ files    |     0
+(4 rows)
+
+store:
