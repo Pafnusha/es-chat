@@ -31,7 +31,12 @@ def pick_room(pg, name):
 
 def login(pg, nick, code):
     pg.goto(PAGE)
-    pg.wait_for_selector("#login:not([hidden])", timeout=20000)
+    try:
+        pg.wait_for_selector("#login:not([hidden])", timeout=20000)
+    except Exception:
+        print("   ! нет экрана входа:", pg.inner_text("body")[:120].replace(chr(10), " | "))
+        print("   ! js:", pg.evaluate("() => [...document.scripts].map(s=>s.src||'inline').join(',')"))
+        raise
     pg.fill("#in-nick", nick)
     pg.fill("#in-code", code)
     pg.click("#btn-login")
