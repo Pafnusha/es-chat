@@ -33,9 +33,12 @@ with sync_playwright() as p:
     pg.click("#btn-login")
     pg.wait_for_timeout(2500)
     ok(pg.is_visible("#app"), "вход в демо-режим прошёл")
-    ok("демо" in pg.inner_text("#room-sub").lower(), "интерфейс честно помечен как демо", pg.inner_text("#room-sub"))
+    ok(pg.is_visible("#demo-flag") and "демо" in pg.inner_text("#demo-flag"),
+       "интерфейс честно помечен как демо", pg.inner_text("#demo-flag"))
     ok("ЭС-общий" in pg.inner_text("#room-list"), "демо-каналы видны", pg.inner_text("#room-list")[:50])
+    pg.wait_for_selector("#room-list li", timeout=8000)
     pg.locator("#room-list li").first.click()
+    pg.wait_for_timeout(800)
     pg.fill("#in-body", "Проверяем демо на живом GitHub Pages")
     pg.click(".send")
     pg.wait_for_timeout(2500)
@@ -59,9 +62,13 @@ with sync_playwright() as p:
     pg2.wait_for_timeout(2000)
     pg2.locator("#room-list li").first.click()
     pg2.wait_for_timeout(2500)
-    ok("демо на живом" in pg2.inner_text("#msgs"), "вторая вкладка этого же браузера видит ленту", pg2.inner_text("#room-sub"))
-    pg2.click("#btn-rooms") if not pg2.is_visible("#drawer") else None
-    pg2.click(".drawer-tabs button[data-tab='dm']")
+    ok("демо на живом" in pg2.inner_text("#msgs"), "вторая вкладка этого же браузера видит ленту",
+       pg2.inner_text("#msgs")[-60:])
+    if pg2.eval_on_selector("#drawer", "e=>e.hidden"):
+        pg2.click("#btn-rooms")
+    pg2.wait_for_selector("#drawer:not([hidden])", timeout=8000)
+    pg2.click('.drawer-tabs button[data-tab="dm"]')
+    pg2.wait_for_timeout(600)
     pg2.click("#btn-newroom")
     pg2.fill("#dm-peer", "Демо-Иван")
     pg2.click("#dm-ok")

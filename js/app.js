@@ -259,7 +259,7 @@ async function enter() {
     throw new Error('auth');
   }
   $('#login').hidden = true; $('#app').hidden = false;
-  if (api.demo) $('#room-sub').textContent = 'демо: сообщения только в этом браузере';
+  $('#demo-flag').hidden = !api.demo;                // не вводим в заблуждение: без сервера это витрина
   if (matchMedia('(min-width: 860px)').matches) $('#drawer').hidden = false;   // на широком экране список всегда открыт
   await loadRooms(); paint(); startPoll(); online(); setInterval(online, 30e3);
   api.onGone && api.onGone(() => pull());      // вторая вкладка этого же браузера пишет сразу
