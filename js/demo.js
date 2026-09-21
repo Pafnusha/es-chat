@@ -54,9 +54,17 @@ export async function rpc(fn, a = {}) {
     return [{ messages: before - d.msgs.length - d.dm.length, dm: 0 }];
   }
   if (fn === 'chat_dm_peers') {
-    const mine = d.dm.filter((m) => m.nick_a === a.p_nick || m.nick_b === a.p_nick && d.ids[a.p_nick] === a.p_code_hash);
+    if (d.ids[a.p_nick] !== a.p_code_hash) throw new Error('wrong code');
+    const mine = d.dm.filter((m) => m.nick_a === a.p_nick || m.nick_b === a.p_nick);
     const by = {};
-    for (const m of mine) { const p = m.nick_a === a.p_nick ? m.nick_b : m.nick_a; if (!by[p] || by[p].last_id < m.id) by[p] = { peer: p, last_id: m.id, last_at: m.created_at, recent_48h: 0 }; by[p].recent_48h++; }
+    for (const m of mine) {
+      const peer = m.nick_a === a.p_nick ? m.nick_b : m.nick_a;
+      const cur = by[peer] || { peer, last_id: 0, last_at: m.created_at, recent_48h: 0 };
+      cur.last_id = Math.max(cur.last_id, m.id);
+      cur.last_at = cur.last_at < m.created_at ? m.created_at : cur.last_at;
+      cur.recent_48h += 1;
+      by[peer] = cur;
+    }
     return Object.values(by).sort((x, y) => y.last_id - x.last_id);
   }
   if (fn === 'chat_dm_history') {
