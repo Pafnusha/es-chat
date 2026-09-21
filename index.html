@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1118">
+<title>ЭС-чат · проектировщики нефтегаза</title>
+<meta name="description" content="Открытый чат без регистрации: каналы, группы, личные сообщения. Всё удаляется через 48 часов.">
+<link rel="stylesheet" href="css/app.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b1118'/%3E%3Cpath d='M7 10h18v9a3 3 0 0 1-3 3h-6l-5 4v-4H10a3 3 0 0 1-3-3z' fill='%23e8a317'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- вход: только ник + код, ничего не сохраняется на сервере кроме этих двух строк -->
+<div id="login" class="sheet">
+  <div class="sheet-card">
+    <h1>ЭС-чат</h1>
+    <p class="lead">Открытый чат проектировщиков электроснабжения. Без регистрации и телефона:
+      придумай ник и код — и заходишь.</p>
+    <label class="f">Ник
+      <input id="in-nick" maxlength="24" autocomplete="nickname" placeholder="например, ЭС-Иван">
+    </label>
+    <label class="f">Код-пароль (придумай сам, 4+ знака)
+      <input id="in-code" type="password" maxlength="64" autocomplete="new-password" placeholder="••••">
+      <button type="button" id="btn-gen" class="mini">сгенерировать</button>
+    </label>
+    <p class="hint">Код нужен, чтобы никто не мог войти под твоим ником и прочитать твою
+      <b>личку</b>. Первый, кто назвал ник, становится его хозяином — занять чужой ник не выйдет.
+      Сохрани код: восстановление не предусмотрено.</p>
+    <button id="btn-login" class="cta">Войти в чат</button>
+    <p id="login-err" class="err" hidden></p>
+    <p class="fine">Сообщения и фото в канале видят все. Личные сообщения читают только два участника
+      переписки — каждый по своему коду. Всё в чате исчезает само: через 48 часов пусто.</p>
+  </div>
+</div>
+
+<main id="app" hidden>
+ <div class="pane">
+  <header class="top">
+    <button id="btn-rooms" class="icon" aria-label="Комнаты">☰</button>
+    <div class="top-mid">
+      <div id="room-title" class="room-title">—</div>
+      <div id="room-sub" class="room-sub"></div>
+    </div>
+    <button id="btn-leave" class="icon" title="Выйти и сменить ник">⏏</button>
+  </header>
+
+  <aside id="drawer" class="drawer" hidden>
+    <div class="drawer-tabs">
+      <button data-tab="channel" class="on">Каналы</button>
+      <button data-tab="group">Группы</button>
+      <button data-tab="dm">Личка</button>
+    </div>
+    <ul id="room-list" class="rooms"></ul>
+    <div class="drawer-foot">
+      <button id="btn-newroom" class="wide">+ создать канал / группу</button>
+      <p class="fine" id="online-line"></p>
+    </div>
+  </aside>
+
+  <section class="board">
+    <ul id="msgs"></ul>
+    <div id="jump" class="jump" hidden><button id="btn-jump">↓ новые</button></div>
+  </section>
+
+  <form id="composer" class="composer">
+    <label class="icon" title="Фото или скрин с телефона">
+      📎<input id="in-file" type="file" accept="image/*" capture="environment" hidden>
+    </label>
+    <textarea id="in-body" rows="1" enterkeyhint="send" placeholder="Сообщение…" maxlength="4000"></textarea>
+    <button type="submit" class="send" aria-label="Отправить">➤</button>
+  </form>
+  <div id="pending" class="pending" hidden></div>
+ </div>
+  <div id="lightbox" hidden><img alt=""></div>
+
+  <dialog id="dlg-new">
+    <form method="dialog" class="dlg">
+      <h2>Новая комната</h2>
+      <label class="f">Тип
+        <select id="new-kind">
+          <option value="channel">канал (открытый, видит весь чат)</option>
+          <option value="group">группа (по названию, входе по желанию)</option>
+        </select>
+      </label>
+      <label class="f">Название
+        <input id="new-name" maxlength="60" placeholder="ЭС-НПС, Молниезащита, Пуск ЭД…">
+      </label>
+      <menu><button value="cancel" class="ghost">Отмена</button><button id="new-ok" value="ok" class="cta">Создать</button></menu>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-dm">
+    <form method="dialog" class="dlg">
+      <h2>Личное сообщение</h2>
+      <label class="f">Ник собеседника
+        <input id="dm-peer" maxlength="24" placeholder="тот, кто уже заходил в чат">
+      </label>
+      <p class="hint">Переписку видите только ты и этот ник — по коду каждого.</p>
+      <menu><button value="cancel" class="ghost">Отмена</button><button id="dm-ok" value="ok" class="cta">Открыть</button></menu>
+    </form>
+  </dialog>
+</main>
+
+<script src="js/config.js"></script>
+<script type="module" src="js/app.js"></script>
+<noscript><p style="padding:2rem;font-family:sans-serif">Нужен включённый JavaScript.</p></noscript>
+</body>
+</html>
