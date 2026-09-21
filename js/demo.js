@@ -76,7 +76,7 @@ export async function rpc(fn, a = {}) {
   }
   if (fn === 'chat_dm_send') {
     if (d.ids[a.p_nick] !== a.p_code_hash) throw new Error('wrong code');
-    if (!d.ids[a.p_peer]) throw new Error('unknown peer');
+    // в витрине адресат мог ещё не входить: право чтения всё равно даёт его код
     d.dm.push({ id: d.seq++, pair: [a.p_nick, a.p_peer].sort().join('|'), nick_a: a.p_nick, nick_b: a.p_peer, author: a.p_nick, body: a.p_body || '', media: a.p_media || null, created_at: new Date().toISOString() });
     save(d); return null;
   }
