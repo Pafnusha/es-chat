@@ -273,6 +273,7 @@ async function enter() {
 }
 
 async function showSetup() {
+  document.body.classList.remove('busy');
   document.body.innerHTML = `<div class="sheet"><div class="sheet-card">
     <h1>Чат ещё не подключён</h1>
     <p class="lead">Владелец страницы должен вписать в <b>js/config.js</b> URL проекта Supabase и
@@ -286,18 +287,19 @@ async function showSetup() {
   document.getElementById('btn-demo').onclick = () => { localStorage.setItem('eschat.demo', '1'); location.href = location.pathname + '?demo=1'; };
 }
 
+document.body.classList.add('busy');
 async function boot() {
-  api = await import(wantDemo() ? './demo.js' : './api.js');
+  try {                                   // Pages несколько минут может отдавать_mix_ версий файлов
+    api = await import(wantDemo() ? './demo.js' : './api.js');
+  } catch (e) {
+    document.body.classList.remove('busy');
+    document.body.innerHTML = `<div class="sheet"><div class="sheet-card"><h1>Страница догрузилась не вся</h1>
+      <p class="lead">Код чата подтянулся с GitHub Pages в двух версиях одновременно — это несколько
+      минут после публикации. Обнови страницу (F5) — и всё заработает.</p>
+      <button class="cta" onclick="location.reload()">Обновить</button></div></div>`;
+    return;
+  }
   if (!wantDemo() && !api.configured()) { showSetup(); return; }
-  const saved = JSON.parse(sessionStorage.getItem('eschat.me') || 'null');
-  const fromUrl = window.ESCHAT?.nick && window.ESCHAT?.code
-    ? { nick: window.ESCHAT.nick, code: window.ESCHAT.code } : null;   // только для отладки/тестов
-  const seed = saved || fromUrl;
-  if (seed) {
-    $('#in-nick').value = seed.nick; $('#in-code').value = seed.code;
-    await login();                                     // вход всегда через сервер, без «доверия» строке URL
-  } else showLogin();
-
   $('#btn-login').onclick = login;
   $('#in-code').addEventListener('keydown', e => e.key === 'Enter' && login());
   $('#in-nick').addEventListener('keydown', e => e.key === 'Enter' && $('#in-code').focus());
@@ -337,5 +339,17 @@ async function boot() {
     e.preventDefault(); const f = e.dataTransfer?.files?.[0]; if (f) await attach(f);
   });
   $('#in-file').onchange = async e => { const f = e.target.files[0]; if (f) await attach(f); e.target.value = ''; };
+
+  // всё развешано — теперь можно показать экран или войти по сохранённому/отладочному вводу
+  const saved = JSON.parse(sessionStorage.getItem('eschat.me') || 'null');
+  const dbg = window.ESCHAT?.nick && window.ESCHAT?.code
+    ? { nick: window.ESCHAT.nick, code: window.ESCHAT.code } : null;      // отладочный ?n=&c= : только localhost
+  const seed = saved || dbg;
+  if (seed) { $('#in-nick').value = seed.nick; $('#in-code').value = seed.code; await login(); }
+  else showLogin();
+
+  document.body.classList.remove('busy');           // с этого момента кнопки точно подключены
 }
+
+
 boot();

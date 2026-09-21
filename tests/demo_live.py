@@ -29,8 +29,26 @@ def pick_room(pg, name):
     time.sleep(1.2)
 
 
-def login(pg, nick, code):
-    pg.goto(PAGE)
+def login(pg, nick, code, tries=3):
+    for n in range(tries):
+        if n:
+            print(f"   · повторная попытка входа ({n + 1}/3): ждём синхронизации кэша Pages")
+            time.sleep(20)
+        pg.goto(PAGE)
+        if _try_login(pg, nick, code):
+            return
+    raise RuntimeError("не удалось войти в демо за 3 попытки")
+
+
+def _try_login(pg, nick, code):
+    try:
+        return _login_body(pg, nick, code)
+    except Exception as e:
+        print("   ! вход не состоялся:", str(e).splitlines()[0][:150])
+        return False
+
+
+def _login_body(pg, nick, code):
     try:
         pg.wait_for_selector("#login:not([hidden])", timeout=20000)
     except Exception:
@@ -42,6 +60,7 @@ def login(pg, nick, code):
     pg.click("#btn-login")
     pg.wait_for_selector("#app:not([hidden])", timeout=20000)
     time.sleep(1.5)
+    return True
 
 
 raw = urllib.request.urlopen("https://raw.githubusercontent.com/Pafnusha/es-chat/main/js/app.js", timeout=30).read().decode()

@@ -17,6 +17,8 @@ body {
 button { font: inherit; color: inherit; }
 
 /* ── вход ── */
+body.busy::after { content: ""; position: fixed; inset: 0; background:
+  radial-gradient(900px 500px at 50% -10%, #16283c, var(--bg)); z-index: 40; }
 .sheet { position: fixed; inset: 0; display: grid; place-items: center; padding: 18px;
   background: radial-gradient(900px 500px at 50% -10%, #16283c, var(--bg)); z-index: 30; }
 .sheet-card { width: min(460px, 100%); background: var(--card); border: 1px solid var(--line);
