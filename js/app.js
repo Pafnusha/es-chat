@@ -66,6 +66,10 @@ async function loadRooms() {
   if (!active && rooms.length) active = { kind: 'room', id: rooms[0].id, name: rooms[0].name };
   renderRooms();
 }
+function toggleDrawer(open) {
+  $('#drawer').hidden = !open;
+  $('#scrim').hidden = !open || matchMedia('(min-width: 860px)').matches;
+}
 function renderRooms() {
   const tab = $('.drawer-tabs .on').dataset.tab;
   const list = $('#room-list'); list.innerHTML = '';
@@ -81,7 +85,7 @@ function renderRooms() {
     li.classList.toggle('on', !!isActive);
     li.onclick = () => {
       active = it.kind === 'dm' ? { kind: 'dm', name: it.name } : { kind: 'room', id: it.id, name: it.name };
-      LS.set('active', active); shown = new Map(); lastId = 0; $('#drawer').hidden = true;
+      LS.set('active', active); shown = new Map(); lastId = 0; toggleDrawer(false);
       renderRooms(); startPoll(); paint();
     };
     list.append(li);
@@ -234,7 +238,7 @@ function wireDialogs() {
     if (!peer) return;
     if (!dms.some(d => d.peer === peer) && !rooms.length && !peer) return;
     $('#dlg-dm').close(); active = { kind: 'dm', name: peer }; LS.set('active', active);
-    shown = new Map(); $('#drawer').hidden = true; renderRooms(); paint(); startPoll();
+    shown = new Map(); toggleDrawer(false); renderRooms(); paint(); startPoll();
   };
 
 }
@@ -260,7 +264,7 @@ async function enter() {
   }
   $('#login').hidden = true; $('#app').hidden = false;
   $('#demo-flag').hidden = !api.demo;                // не вводим в заблуждение: без сервера это витрина
-  if (matchMedia('(min-width: 860px)').matches) $('#drawer').hidden = false;   // на широком экране список всегда открыт
+  if (matchMedia('(min-width: 860px)').matches) toggleDrawer(true);           // на широком экране список открыт всегда
   await loadRooms(); paint(); startPoll(); online(); setInterval(online, 30e3);
   api.onGone && api.onGone(() => pull());      // вторая вкладка этого же браузера пишет сразу
   await api.rpc('chat_join', { p_room: active?.kind === 'room' ? active.id : null, p_nick: me.nick, p_code_hash: me.hash }).catch(() => {});
@@ -300,7 +304,8 @@ async function boot() {
     const a = [...crypto.getRandomValues(new Uint8Array(6))].map(b => b.toString(36).padStart(2, '0')).join('');
     $('#in-code').value = a; $('#in-code').type = 'text';
   };
-  $('#btn-rooms').onclick = () => { $('#drawer').hidden = !$('#drawer').hidden; };
+  $('#btn-rooms').onclick = () => toggleDrawer($('#drawer').hidden);   // открыть, если закрыт
+  $('#scrim').onclick = () => toggleDrawer(true);
   $('#btn-leave').onclick = () => { sessionStorage.removeItem('eschat.me'); location.reload(); };
   $('#lightbox').onclick = () => { $('#lightbox').hidden = true; };
   $('#btn-jump').onclick = () => { const b = $('#msgs'); b.scrollTop = b.scrollHeight; $('#jump').hidden = true; };
