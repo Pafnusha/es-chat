@@ -1,4 +1,5 @@
 store/
 tests/*.log
+tests/*.out
 tests/__pycache__/
 .DS_Store
