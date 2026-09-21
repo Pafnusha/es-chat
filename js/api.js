@@ -7,6 +7,7 @@ const headers = (extra = {}) => ({
   apikey: cfg.key, Authorization: 'Bearer ' + cfg.key,
   'Content-Type': 'application/json', ...extra,
 });
+export const demo = false;                    // режим витрины включается в demo.js
 export const configured = () => /^https?:\/\//i.test(base()) && cfg.key.length > 8;
 
 async function req(url, opt) {

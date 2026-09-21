@@ -1,4 +1,5 @@
-import * as api from './api.js';
+let api = null;                                 // api.js (Supabase) или demo.js (витрина без сервера)
+const wantDemo = () => localStorage.getItem('eschat.demo') === '1' || new URLSearchParams(location.search).get('demo') === '1';
 
 const $ = (s) => document.querySelector(s);
 const el = (tag, cls, txt) => { const n = document.createElement(tag); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
@@ -258,23 +259,31 @@ async function enter() {
     throw new Error('auth');
   }
   $('#login').hidden = true; $('#app').hidden = false;
+  if (api.demo) $('#room-sub').textContent = 'демо: сообщения только в этом браузере';
   if (matchMedia('(min-width: 860px)').matches) $('#drawer').hidden = false;   // на широком экране список всегда открыт
   await loadRooms(); paint(); startPoll(); online(); setInterval(online, 30e3);
+  api.onGone && api.onGone(() => pull());      // вторая вкладка этого же браузера пишет сразу
   await api.rpc('chat_join', { p_room: active?.kind === 'room' ? active.id : null, p_nick: me.nick, p_code_hash: me.hash }).catch(() => {});
   if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration?.()?.update?.().catch(() => {});
 }
 
+async function showSetup() {
+  document.body.innerHTML = `<div class="sheet"><div class="sheet-card">
+    <h1>Чат ещё не подключён</h1>
+    <p class="lead">Владелец страницы должен вписать в <b>js/config.js</b> URL проекта Supabase и
+    public anon key (Settings → API keys) — и залить это на GitHub Pages. Пароль от базы и
+    service_role не нужны и не должны попадать в клиент: доступ к личке держится на нику и коде.</p>
+    <button class="cta" id="btn-demo">Посмотреть демо прямо здесь</button>
+    <p class="fine" style="margin-top:10px">В демо сообщения живут только в этом браузере и между
+    людьми не передаются — это витрина интерфейса, а не чат. При этом каналы, личка по коду,
+    фото, сжатие скриншотов и автоочистка через 48 часов работают здесь как настоящие.</p>
+  </div></div>`;
+  document.getElementById('btn-demo').onclick = () => { localStorage.setItem('eschat.demo', '1'); location.href = location.pathname + '?demo=1'; };
+}
+
 async function boot() {
-  if (!api.configured()) {
-    document.body.innerHTML = `<div class="sheet"><div class="sheet-card">
-      <h1>Настроить чат</h1>
-      <p class="lead">Открой <b>js/config.js</b> и впиши URL проекта Supabase и public anon key
-      (Settings → API keys), затем загрузи страницу на GitHub Pages. Пароль от БД и service-key
-      нигде не нужны: доступ к личке держится на нику и твоём коде.</p>
-      <p class="fine">Пока конфиг пустой, страница не подключается к серверу и ничего не отправляет.</p>
-    </div></div>`;
-    return;
-  }
+  api = await import(wantDemo() ? './demo.js' : './api.js');
+  if (!wantDemo() && !api.configured()) { showSetup(); return; }
   const saved = JSON.parse(sessionStorage.getItem('eschat.me') || 'null');
   const fromUrl = window.ESCHAT?.nick && window.ESCHAT?.code
     ? { nick: window.ESCHAT.nick, code: window.ESCHAT.code } : null;   // только для отладки/тестов
