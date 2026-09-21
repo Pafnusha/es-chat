@@ -56,7 +56,7 @@ button { font: inherit; color: inherit; }
   box-shadow: 24px 0 60px rgba(0,0,0,.45); }
 @media (min-width: 860px) { #drawer { right: auto; width: 320px; } }
 #drawer[hidden] { display: none; }
-@media (max-width: 859px) { #drawer::after { content: ""; position: fixed; inset: 0; background: rgba(4,8,12,.55); } }
+/* подложку-скрим здесь не делаем: он лежит внутри ящика и перехватывает клики по списку */
 .drawer-tabs { display: flex; gap: 4px; padding: calc(10px + var(--safe-t)) 10px 8px; }
 .drawer-tabs button { flex: 1; padding: 9px 4px; border: 1px solid var(--line); background: #0f1822;
   border-radius: 9px; font-size: 13px; cursor: pointer; color: var(--muted); }
