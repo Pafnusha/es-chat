@@ -137,7 +137,8 @@ async function pull() {
   if (++pulls % 6 === 0) loadRooms();          // раз ~13 сек освежаем и список комнат/собеседников
   try {
     let rows = [];
-    if (active.kind === 'room') rows = await api.roomMessages(active.id);
+    const head = shown.size ? Math.max(...shown.keys()) : null;   // добираем только новое
+    if (active.kind === 'room') rows = await api.roomMessages(active.id, head);
     else rows = await api.rpc('chat_dm_history', { p_nick: me.nick, p_code_hash: me.hash, p_peer: active.name, p_before: null, p_limit: 120 }) || [];
     let grew = false;
     for (const m of rows) if (!shown.has(m.id)) { shown.set(m.id, m); grew = true; }
